@@ -21,8 +21,9 @@
 // export default router;
 
 import { Router } from "express";
-import { registerUser } from "../controllers/user.controllers.js";
+import { registerUser,loginUser ,logoutUser,refreshAccessToken} from "../controllers/user.controllers.js";
 import { upload } from "../middlewares/multer.js";
+import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
@@ -32,11 +33,12 @@ router.post(
     { name: "avatar", maxCount: 1 },
     { name: "coverImage", maxCount: 1 },
   ]),(req, res, next) => {
-    // Yahan par check kijiye req.body aur req.files ka status
+   
+    
     console.log("Request Body:", req.body);
     console.log("Request Files:", req.files);
 
-    // Agar email undefined aa raha hai ya avatar file missing hai to error bhej dijiye
+   
     if (!req.body.email) {
       return res.status(400).json({ error: "Email is required" });
     }
@@ -45,8 +47,12 @@ router.post(
     }
     next();
   },
-  
   registerUser
 );
+//login route
+router.post("/login",loginUser)
 
+//secured routes 
+  router.route("/logout").post(verifyJWT,logoutUser)
+  router.route("/refresh-token").post(refreshAccessToken)
 export default router;
